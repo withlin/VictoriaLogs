@@ -11,7 +11,7 @@ import EmptyLogs from "../../EmptyLogs/EmptyLogs";
 
 const MemoizedTableView = memo(TableLogs);
 
-const TableView: FC<ViewProps> = ({ data, settingsRef }) => {
+const TableView: FC<ViewProps> = ({ data, settingsRef, onApplyFilter }) => {
   const { setSearchParamsFromKeys } = useSearchParamsFromObject();
   const [displayColumns, setDisplayColumns] = useState<string[]>([]);
   const [rowsPerPage, setRowsPerPage] = useStateSearchParams(100, "rows_per_page");
@@ -63,6 +63,7 @@ const TableView: FC<ViewProps> = ({ data, settingsRef }) => {
         tableCompact={false}
         columns={columns}
         rowsPerPage={Number(rowsPerPage)}
+        onApplyFilter={onApplyFilter}
       />
     </>
   );

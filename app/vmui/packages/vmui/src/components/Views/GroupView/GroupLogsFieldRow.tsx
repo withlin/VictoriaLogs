@@ -1,20 +1,22 @@
 import { FC, memo, useCallback, useEffect, useState } from "preact/compat";
 import Tooltip from "../../Main/Tooltip/Tooltip";
 import Button from "../../Main/Button/Button";
-import { CopyIcon, StorageIcon, VisibilityIcon } from "../../Main/Icons";
+import { CopyIcon, StorageIcon, VisibilityIcon, ZoomInIcon } from "../../Main/Icons";
 import useCopyToClipboard from "../../../hooks/useCopyToClipboard";
 import { useSearchParams } from "react-router-dom";
 import { LOGS_GROUP_BY, LOGS_URL_PARAMS } from "../../../constants/logs";
 import classNames from "classnames";
 import useDeviceDetect from "../../../hooks/useDeviceDetect";
+import { ExtraFilter, ExtraFilterOperator } from "../../../pages/OverviewPage/FiltersBar/types";
 
 interface Props {
   field: string;
   value: string;
   hideGroupButton?: boolean;
+  onApplyFilter?: (value: ExtraFilter) => void;
 }
 
-const GroupLogsFieldRow: FC<Props> = ({ field, value, hideGroupButton }) => {
+const GroupLogsFieldRow: FC<Props> = ({ field, value, hideGroupButton, onApplyFilter }) => {
   const { isMobile } = useDeviceDetect();
   const copyToClipboard = useCopyToClipboard();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,6 +50,11 @@ const GroupLogsFieldRow: FC<Props> = ({ field, value, hideGroupButton }) => {
   const handleSelectGroupBy = () => {
     isGroupByField ? searchParams.delete(LOGS_URL_PARAMS.GROUP_BY) : searchParams.set(LOGS_URL_PARAMS.GROUP_BY, field);
     setSearchParams(searchParams);
+  };
+
+  const handleApplyFilter = (operator: ExtraFilterOperator) => async () => {
+    if (!onApplyFilter) return;
+    await onApplyFilter({ field, value: String(value), operator });
   };
 
   useEffect(() => {
@@ -87,6 +94,19 @@ const GroupLogsFieldRow: FC<Props> = ({ field, value, hideGroupButton }) => {
               ariaLabel={isSelectedField ? "Hide this field" : "Show this field instead of the message"}
             />
           </Tooltip>
+          {onApplyFilter && (
+            <Tooltip title="Add to query">
+              <Button
+                className="vm-group-logs-row-fields-item-controls__button"
+                variant="text"
+                color="gray"
+                size="small"
+                startIcon={<ZoomInIcon/>}
+                onClick={handleApplyFilter(ExtraFilterOperator.Equals)}
+                ariaLabel="add to query"
+              />
+            </Tooltip>
+          )}
           {!hideGroupButton && (
             <Tooltip title={isGroupByField ? "Ungroup this field" : "Group by this field"}>
               <Button

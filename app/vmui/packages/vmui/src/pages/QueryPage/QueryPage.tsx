@@ -145,8 +145,23 @@ const QueryPage: FC = () => {
   };
 
   const handleApplyFilter = (val: ExtraFilter) => {
-    setQuery(prev => `${filterToExpr(val)} AND ${prev}`);
-    setIsUpdatingQuery(true);
+    const filterExpr = filterToExpr(val);
+    let updated = false;
+    setQuery(prev => {
+      const trimmed = prev.trim();
+      if (!trimmed) {
+        updated = true;
+        return filterExpr;
+      }
+      if (trimmed === "*") {
+        updated = true;
+        return `* | ${filterExpr}`;
+      }
+      return prev;
+    });
+    if (updated) {
+      setIsUpdatingQuery(true);
+    }
   };
 
   const handleUpdateQuery = () => {
@@ -238,6 +253,7 @@ const QueryPage: FC = () => {
         data={logs}
         queryParams={queryParams}
         isLoading={isLoading}
+        onApplyFilter={handleApplyFilter}
       />
     </div>
   );

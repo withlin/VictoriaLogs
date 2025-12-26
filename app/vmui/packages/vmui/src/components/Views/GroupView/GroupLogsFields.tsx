@@ -5,13 +5,15 @@ import classNames from "classnames";
 import GroupLogsFieldRow from "./GroupLogsFieldRow";
 import { useLocalStorageBoolean } from "../../../hooks/useLocalStorageBoolean";
 import useDeviceDetect from "../../../hooks/useDeviceDetect";
+import { ExtraFilter } from "../../../pages/OverviewPage/FiltersBar/types";
 
 interface Props {
   log: Logs;
   hideGroupButton?: boolean;
+  onApplyFilter?: (value: ExtraFilter) => void;
 }
 
-const GroupLogsFields: FC<Props> = ({ log, hideGroupButton }) => {
+const GroupLogsFields: FC<Props> = ({ log, hideGroupButton, onApplyFilter }) => {
   const { isMobile } = useDeviceDetect();
 
   const sortedFields = useMemo(() => {
@@ -37,6 +39,7 @@ const GroupLogsFields: FC<Props> = ({ log, hideGroupButton }) => {
               field={key}
               value={value}
               hideGroupButton={hideGroupButton}
+              onApplyFilter={onApplyFilter}
             />
           ))}
         </tbody>

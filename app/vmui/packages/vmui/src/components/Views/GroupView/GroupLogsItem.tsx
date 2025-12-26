@@ -19,6 +19,7 @@ import StreamContextButton from "../../../pages/StreamContext/StreamContextButto
 import { useAppState } from "../../../state/common/StateContext";
 import { formatDateWithNanoseconds } from "../../../utils/time";
 import useDeviceDetect from "../../../hooks/useDeviceDetect";
+import { ExtraFilter } from "../../../pages/OverviewPage/FiltersBar/types";
 
 interface Props {
   log: Logs;
@@ -27,9 +28,18 @@ interface Props {
   isContextView?: boolean;
   className?: string;
   onItemClick?: (log: Logs) => void;
+  onApplyFilter?: (value: ExtraFilter) => void;
 }
 
-const GroupLogsItem: FC<Props> = ({ log, displayFields = [], isContextView, hideGroupButton, className, onItemClick }) => {
+const GroupLogsItem: FC<Props> = ({
+  log,
+  displayFields = [],
+  isContextView,
+  hideGroupButton,
+  className,
+  onItemClick,
+  onApplyFilter
+}) => {
   const { isDarkTheme } = useAppState();
   const { isMobile } = useDeviceDetect();
 
@@ -191,6 +201,7 @@ const GroupLogsItem: FC<Props> = ({ log, displayFields = [], isContextView, hide
         <GroupLogsFields
           hideGroupButton={hideGroupButton}
           log={log}
+          onApplyFilter={onApplyFilter}
         />
       )}
     </div>

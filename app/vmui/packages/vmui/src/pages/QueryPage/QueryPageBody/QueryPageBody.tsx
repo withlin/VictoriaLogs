@@ -25,12 +25,14 @@ import Button from "../../../components/Main/Button/Button";
 import { useSearchParams } from "react-router-dom";
 import Alert from "../../../components/Main/Alert/Alert";
 import DownloadLogsModal from "../../../components/DownloadLogs/DownloadLogsModal";
+import { ExtraFilter } from "../FiltersBar/types";
 
 interface Props {
   data: Logs[];
   queryParams?: Record<string, string>;
   isLoading: boolean;
   isPreview?: boolean;
+  onApplyFilter?: (value: ExtraFilter) => void;
 }
 
 enum DisplayType {
@@ -47,7 +49,7 @@ const tabs = [
   { label: "Live", value: DisplayType.liveTailing, icon: <PlayIcon/>, Component: LiveTailingView },
 ];
 
-const QueryPageBody: FC<Props> = ({ data, queryParams, isLoading, isPreview }) => {
+const QueryPageBody: FC<Props> = ({ data, queryParams, isLoading, isPreview, onApplyFilter }) => {
   const { isMobile } = useDeviceDetect();
   const { setSearchParamsFromKeys } = useSearchParamsFromObject();
   const [activeTab, setActiveTab] = useStateSearchParams(DisplayType.group, "view");
@@ -143,6 +145,7 @@ const QueryPageBody: FC<Props> = ({ data, queryParams, isLoading, isPreview }) =
           <ActiveTabComponent
             data={data}
             settingsRef={settingsRef}
+            onApplyFilter={onApplyFilter}
           />
         }
       </div>

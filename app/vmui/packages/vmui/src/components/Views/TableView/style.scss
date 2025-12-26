@@ -7,3 +7,26 @@
     align-items: center;
   }
 }
+
+.vm-table-logs-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: $padding-small;
+  min-height: 24px;
+
+  &__value {
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  &__actions {
+    display: inline-flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &:hover &__actions {
+    opacity: 1;
+  }
+}

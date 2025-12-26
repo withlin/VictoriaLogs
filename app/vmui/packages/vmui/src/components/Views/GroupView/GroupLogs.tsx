@@ -18,13 +18,15 @@ import SelectLimit from "../../Main/Pagination/SelectLimit/SelectLimit";
 import { usePaginateGroups } from "../../../pages/QueryPage/hooks/usePaginateGroups";
 import { GroupLogsType } from "../../../types";
 import useDeviceDetect from "../../../hooks/useDeviceDetect";
+import { ExtraFilter } from "../../../pages/OverviewPage/FiltersBar/types";
 
 interface Props {
   logs: Logs[];
   settingsRef: RefObject<HTMLElement>;
+  onApplyFilter?: (value: ExtraFilter) => void;
 }
 
-const GroupLogs: FC<Props> = ({ logs, settingsRef }) => {
+const GroupLogs: FC<Props> = ({ logs, settingsRef, onApplyFilter }) => {
   const { isMobile } = useDeviceDetect();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -121,6 +123,7 @@ const GroupLogs: FC<Props> = ({ logs, settingsRef }) => {
                     key={`${groupN}_${rowN}_${log._time}`}
                     log={log}
                     displayFields={displayFields}
+                    onApplyFilter={onApplyFilter}
                   />
                 ))}
               </div>

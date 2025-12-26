@@ -1,7 +1,11 @@
-import { FC, useMemo, useEffect, useRef, useState } from "preact/compat";
+import { FC, useMemo, useEffect, useRef, useState, MouseEvent } from "preact/compat";
 import Table from "../../Table/Table";
 import { Logs } from "../../../api/types";
 import Pagination from "../../Main/Pagination/Pagination";
+import { ExtraFilter, ExtraFilterOperator } from "../../../pages/OverviewPage/FiltersBar/types";
+import Tooltip from "../../Main/Tooltip/Tooltip";
+import Button from "../../Main/Button/Button";
+import { ZoomInIcon } from "../../Main/Icons";
 
 interface TableLogsProps {
   logs: Logs[];
@@ -9,6 +13,7 @@ interface TableLogsProps {
   tableCompact: boolean;
   columns: string[];
   rowsPerPage: number;
+  onApplyFilter?: (value: ExtraFilter) => void;
 }
 
 const getColumnClass = (key: string) => {
@@ -26,7 +31,7 @@ const compactColumns = [{
   className: "vm-table-cell_logs vm-table-cell_pre"
 }];
 
-const TableLogs: FC<TableLogsProps> = ({ logs, displayColumns, tableCompact, columns, rowsPerPage }) => {
+const TableLogs: FC<TableLogsProps> = ({ logs, displayColumns, tableCompact, columns, rowsPerPage, onApplyFilter }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
 
@@ -37,13 +42,51 @@ const TableLogs: FC<TableLogsProps> = ({ logs, displayColumns, tableCompact, col
     }) as Logs[];
   }, [logs]);
 
+  const createCellRenderer = (field: string) => (log: Logs) => {
+    const rawValue = log[field];
+    const value = rawValue ?? "-";
+
+    const handleFilter = (operator: ExtraFilterOperator) => (e: MouseEvent) => {
+      e.stopPropagation();
+      if (!onApplyFilter || rawValue === undefined) return;
+      onApplyFilter({
+        field,
+        value: String(rawValue),
+        operator
+      });
+    };
+
+    return (
+      <div className="vm-table-logs-cell">
+        <span className="vm-table-logs-cell__value">
+          {value}
+        </span>
+        {onApplyFilter && value !== "-" && (
+          <div className="vm-table-logs-cell__actions">
+            <Tooltip title="Add to query">
+              <Button
+                variant="text"
+                color="gray"
+                size="small"
+                startIcon={<ZoomInIcon/>}
+                onClick={handleFilter(ExtraFilterOperator.Equals)}
+                ariaLabel="add to query"
+              />
+            </Tooltip>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const tableColumns = useMemo(() => {
     return columns.map((key) => ({
       key: key as keyof Logs,
       title: key,
       className: getColumnClass(key),
+      render: createCellRenderer(key),
     }));
-  }, [columns]);
+  }, [columns, onApplyFilter]);
 
 
   const filteredColumns = useMemo(() => {
