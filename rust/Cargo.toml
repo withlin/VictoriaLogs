@@ -1,0 +1,12 @@
+[workspace]
+members = [
+  "logstorage",
+  "vmstorage",
+  "vminsert",
+  "vmselect",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"

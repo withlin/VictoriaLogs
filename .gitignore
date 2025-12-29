@@ -22,3 +22,4 @@ coverage.txt
 cspell.json
 *~
 deployment/docker/provisioning/plugins/
+rust/target/

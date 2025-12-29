@@ -1,0 +1,11 @@
+[package]
+name = "vminsert"
+version = "0.1.0"
+edition = "2021"
+description = "Rust scaffold for VictoriaLogs vminsert entrypoint."
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+logstorage = { path = "../logstorage" }
+clap = { version = "4.5", features = ["derive"] }
