@@ -14,19 +14,24 @@ func TestStorageLifecycle(t *testing.T) {
 	t.Parallel()
 
 	path := t.Name()
+	t.Cleanup(func() {
+		fs.MustRemoveDir(path)
+	})
 
 	for i := 0; i < 3; i++ {
 		cfg := &StorageConfig{}
 		s := MustOpenStorage(path, cfg)
 		s.MustClose()
 	}
-	fs.MustRemoveDir(path)
 }
 
 func TestStorageMustAddRows(t *testing.T) {
 	t.Parallel()
 
 	path := t.Name()
+	t.Cleanup(func() {
+		fs.MustRemoveDir(path)
+	})
 
 	cfg := &StorageConfig{}
 	s := MustOpenStorage(path, cfg)
@@ -106,8 +111,6 @@ func TestStorageMustAddRows(t *testing.T) {
 		t.Fatalf("unexpected number of entries in storage; got %d; want %d", n, totalRowsCount)
 	}
 	s.MustClose()
-
-	fs.MustRemoveDir(path)
 }
 
 func TestStorageDeleteTaskOps(t *testing.T) {
@@ -116,6 +119,12 @@ func TestStorageDeleteTaskOps(t *testing.T) {
 	path := t.Name()
 	cfg := &StorageConfig{}
 	s := MustOpenStorage(path, cfg)
+	t.Cleanup(func() {
+		if s != nil {
+			s.MustClose()
+		}
+		fs.MustRemoveDir(path)
+	})
 
 	ctx := t.Context()
 	taskID := "task_id_1"
@@ -162,8 +171,7 @@ func TestStorageDeleteTaskOps(t *testing.T) {
 	}
 
 	s.MustClose()
-
-	fs.MustRemoveDir(path)
+	s = nil
 }
 
 func TestStorageProcessDeleteTask(t *testing.T) {
@@ -176,6 +184,12 @@ func TestStorageProcessDeleteTask(t *testing.T) {
 		Retention: 30 * 24 * time.Hour,
 	}
 	s := MustOpenStorage(path, cfg)
+	t.Cleanup(func() {
+		if s != nil {
+			s.MustClose()
+		}
+		fs.MustRemoveDir(path)
+	})
 
 	now := time.Now().UnixNano()
 
@@ -279,8 +293,7 @@ func TestStorageProcessDeleteTask(t *testing.T) {
 	check(allTenantIDs, "* | count(host) rows", []string{`{"rows":"5284"}`})
 
 	s.MustClose()
-
-	fs.MustRemoveDir(path)
+	s = nil
 }
 
 func checkQueryResults(t *testing.T, s *Storage, tenantIDs []TenantID, qStr string, hiddenFieldsFilters, resultsExpected []string) {

@@ -1754,6 +1754,50 @@ See also:
 - [`replace`](https://docs.victoriametrics.com/victorialogs/logsql/#replace-pipe)
 - [`replace_regexp`](https://docs.victoriametrics.com/victorialogs/logsql/#replace_regexp-pipe)
 
+### collapse_template pipe
+
+`<q> | collapse_template "<template>" [split "<sep>"] [if (...)] [at <field>]` [pipe](https://docs.victoriametrics.com/victorialogs/logsql/#pipes) normalizes string values using simple placeholders without regex.
+
+- Default `split` is `/`. Custom separators such as `.` or `:` are supported via `split "<sep>"`.
+- Placeholders (can have prefix/suffix inside a segment):
+  - `<N>`: digits
+  - `<ID>`: any non-empty segment (excluding the separator)
+  - `<W>`: word segment (letters, digits, underscore)
+- If the value matches the template after splitting by `sep`, it is rewritten to the normalized template. Otherwise, the original value is returned (fail-open).
+- Works with [`if (...)`](https://docs.victoriametrics.com/victorialogs/logsql/#conditional-collapse_nums) and `at <field>` the same way as other pipes.
+
+Examples:
+
+```logsql
+// Normalize path-like values
+kubernetes.container_name:"nginx-log-generator"
+| http.uri:*
+| collapse_template "/v<N>/orders/<ID>/courier" at http.uri
+| stats by (http.uri) count() as hits
+| sort by (hits desc)
+```
+
+```logsql
+// Include domain in the template
+collapse_template "api.example.com/v<N>/orders/<ID>/courier" at http.url
+```
+
+```logsql
+// Dot-separated host
+collapse_template "v<N>.service.<W>" split "." at host
+```
+
+```logsql
+// Mixed prefix/suffix with colon separator
+collapse_template "<W>:v<N>:rev<ID>" split ":" at tag
+```
+
+See also:
+
+- [`collapse_nums` pipe](https://docs.victoriametrics.com/victorialogs/logsql/#collapse_nums-pipe)
+- [`replace` pipe](https://docs.victoriametrics.com/victorialogs/logsql/#replace-pipe)
+- [`replace_regexp` pipe](https://docs.victoriametrics.com/victorialogs/logsql/#replace_regexp-pipe)
+
 #### Conditional collapse_nums
 
 If the [`collapse_nums` pipe](https://docs.victoriametrics.com/victorialogs/logsql/#collapse_nums-pipe) must be applied only to some [log entries](https://docs.victoriametrics.com/victorialogs/keyconcepts/#data-model),

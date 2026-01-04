@@ -73,6 +73,53 @@ func expectPipeResults(t *testing.T, pipeStr string, rows, rowsExpected [][]Fiel
 	ppTest.expectRows(t, rowsExpected)
 }
 
+func expectPipelineResults(t *testing.T, pipelineStr string, rows, rowsExpected [][]Field) {
+	t.Helper()
+
+	lex := newLexer(pipelineStr, 0)
+	pipes, err := parsePipes(lex)
+	if err != nil {
+		t.Fatalf("unexpected error when parsing %q: %s", pipelineStr, err)
+	}
+	if !lex.isEnd() {
+		t.Fatalf("unexpected tail after parsing [%s]: [%s]", pipelineStr, lex.s)
+	}
+
+	workersCount := 5
+	stopCh := make(chan struct{})
+	cancel := func() {}
+
+	sink := newTestPipeProcessor()
+	pp := pipeProcessor(sink)
+	pps := make([]pipeProcessor, len(pipes))
+	for i := len(pipes) - 1; i >= 0; i-- {
+		ppCur := pipes[i].newPipeProcessor(workersCount, stopCh, cancel, pp)
+		pp = ppCur
+		pps[i] = ppCur
+	}
+
+	brw := newTestBlockResultWriter(workersCount, pp)
+	for _, row := range rows {
+		brw.writeRow(row)
+	}
+	brw.flush()
+
+	qs := &QueryStats{}
+	for _, p := range pps {
+		switch t := p.(type) {
+		case *pipeQueryStatsProcessor:
+			t.setQueryStats(qs, 0)
+		case *pipeQueryStatsLocalProcessor:
+			t.setQueryStats(qs, 0)
+		}
+		if err := p.flush(); err != nil {
+			t.Fatalf("unexpected error when flushing pipe %T: %s", p, err)
+		}
+	}
+
+	sink.expectRows(t, rowsExpected)
+}
+
 func newTestBlockResultWriter(workersCount int, ppNext pipeProcessor) *testBlockResultWriter {
 	return &testBlockResultWriter{
 		workersCount: workersCount,

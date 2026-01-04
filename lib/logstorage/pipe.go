@@ -176,6 +176,7 @@ func getPipeParsers() map[string]pipeParseFunc {
 
 func initPipeParsers() {
 	pipeParsers = map[string]pipeParseFunc{
+		"collapse_template": parsePipeCollapseTemplate,
 		"block_stats":       parsePipeBlockStats,
 		"blocks_count":      parsePipeBlocksCount,
 		"collapse_nums":     parsePipeCollapseNums,
